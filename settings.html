@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Master Admin - Add Hotels</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .form-container { max-width: 450px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+        input { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; }
+        button { width: 100%; background: #28a745; color: white; padding: 12px; border: none; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Add New Hotel</h2>
+    <input type="text" id="hName" placeholder="Hotel Name">
+    <input type="text" id="hImg" placeholder="Image URL">
+    <input type="number" id="hComm" placeholder="Taxi Commission (₹)">
+    <input type="number" id="hAcPrice" placeholder="A/C Starting Price">
+    <input type="number" id="hNacPrice" placeholder="Non-A/C Starting Price">
+    <input type="text" id="hMap" placeholder="Google Map Link">
+    <input type="password" id="hPass" placeholder="Set Manager Password">
+    <button id="addBtn">Add Hotel to Index</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCvjtl_xusE7v6nXWSqabujY-88Apu-WR8",
+        authDomain: "taxi-commission.firebaseapp.com",
+        databaseURL: "https://taxi-commission-default-rtdb.firebaseio.com",
+        projectId: "taxi-commission"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    document.getElementById('addBtn').onclick = () => {
+        const id = document.getElementById('hName').value.replace(/\s+/g, '-').toLowerCase();
+        set(ref(db, 'hotels/' + id), {
+            name: document.getElementById('hName').value,
+            img: document.getElementById('hImg').value,
+            commission: document.getElementById('hComm').value,
+            acPrice: document.getElementById('hAcPrice').value,
+            nacPrice: document.getElementById('hNacPrice').value,
+            mapUrl: document.getElementById('hMap').value,
+            password: document.getElementById('hPass').value,
+            acRooms: 20,
+            nacRooms: 20
+        }).then(() => {
+            alert("Hotel Added Successfully!");
+            location.reload();
+        });
+    };
+</script>
+</body>
+</html>
