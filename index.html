@@ -395,7 +395,7 @@
             const body = document.createElement('div');
             body.className = 'container';
             body.innerHTML = `
-                <h2 class="hotel-name" title="Double-tap to unlock editing" ondblclick="window.unlockManager('${id}', this)">${hotel.name}</h2>
+                <h2 class="hotel-name" data-hotel-name="${id}" title="Double-tap to unlock editing" ondblclick="window.unlockManager('${id}')">${hotel.name}</h2>
                 <div class="comm-badge">🚖 Commission: ₹${hotel.commission}</div>
 
                 <div class="rooms-section-title">🛏️ Vacate Rooms</div>
@@ -418,21 +418,35 @@
             card.appendChild(body);
             hotelList.appendChild(card);
         }
+
+        // Re-apply unlock state for any hotels that were already unlocked
+        unlockedHotels.forEach(id => applyUnlock(id));
     });
 
-    window.unlockManager = async (hotelId, nameEl) => {
+    // Track which hotels are unlocked so re-renders don't lock them again
+    const unlockedHotels = new Set();
+
+    function applyUnlock(hotelId) {
+        const acSel = document.getElementById(`ac-${hotelId}`);
+        const nacSel = document.getElementById(`nac-${hotelId}`);
+        const nameEl = document.querySelector(`[data-hotel-name="${hotelId}"]`);
+        if (!acSel || !nacSel) return;
+
+        acSel.disabled = false;
+        nacSel.disabled = false;
+        acSel.onchange = (e) => update(ref(db, `hotels/${hotelId}`), { acRooms: parseInt(e.target.value) });
+        nacSel.onchange = (e) => update(ref(db, `hotels/${hotelId}`), { nacRooms: parseInt(e.target.value) });
+        if (nameEl) nameEl.style.color = '#10b981';
+    }
+
+    window.unlockManager = async (hotelId) => {
         const pass = prompt("Enter Manager Code for this Hotel:");
         if (!pass) return;
         const passSnap = await get(ref(db, `hotels/${hotelId}/password`));
         if (pass === passSnap.val()) {
-            const acSel = document.getElementById(`ac-${hotelId}`);
-            const nacSel = document.getElementById(`nac-${hotelId}`);
-            acSel.disabled = false;
-            nacSel.disabled = false;
-            acSel.onchange = (e) => update(ref(db, `hotels/${hotelId}`), { acRooms: e.target.value });
-            nacSel.onchange = (e) => update(ref(db, `hotels/${hotelId}`), { nacRooms: e.target.value });
-            if (nameEl) nameEl.style.color = '#10b981';
-            alert("✅ Editing enabled!");
+            unlockedHotels.add(hotelId);
+            applyUnlock(hotelId);
+            alert("✅ Both A/C and Non-A/C editing enabled!");
         } else {
             alert("❌ Incorrect Code!");
         }
