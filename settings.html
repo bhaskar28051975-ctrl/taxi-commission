@@ -2,31 +2,369 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Master Admin - Add Hotels</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Admin - Hotel Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-        .form-container { max-width: 450px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
-        input { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; }
-        button { width: 100%; background: #28a745; color: white; padding: 12px; border: none; cursor: pointer; font-weight: bold; }
+        :root {
+            --primary: #1a73e8;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --green: #10b981;
+            --bg: #f0f4ff;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            padding: 20px 16px 40px;
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 24px;
+            letter-spacing: -0.5px;
+        }
+
+        /* ── Layout ── */
+        .admin-grid {
+            max-width: 1100px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 768px) {
+            .admin-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ── Panel / Card ── */
+        .panel {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+            border: 1px solid var(--border);
+        }
+
+        .panel-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            color: var(--text);
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--bg);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── Form ── */
+        .field-group { margin-bottom: 14px; }
+        .field-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+
+        input[type=text], input[type=number], input[type=password], input[type=url], textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            background: #f8fafc;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+            background: #fff;
+        }
+
+        textarea { resize: vertical; min-height: 70px; }
+
+        /* ── Photo Manager ── */
+        .photo-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+        .photo-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f8fafc;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 10px;
+        }
+        .photo-item img {
+            width: 52px; height: 38px;
+            object-fit: cover;
+            border-radius: 6px;
+            flex-shrink: 0;
+            background: #e2e8f0;
+        }
+        .photo-item input {
+            flex: 1; padding: 6px 10px; font-size: 13px;
+            border: 1.5px solid var(--border); border-radius: 8px;
+            background: #fff; outline: none;
+        }
+        .photo-item input:focus { border-color: var(--primary); }
+        .photo-remove {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .photo-remove:hover { background: #fee2e2; }
+        .add-photo-btn {
+            width: 100%;
+            padding: 9px;
+            background: #eff6ff;
+            border: 1.5px dashed var(--primary);
+            border-radius: 10px;
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .add-photo-btn:hover { background: #dbeafe; }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 11px 20px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: #fff; width: 100%; }
+        .btn-primary:hover { background: #1558c0; }
+        .btn-green { background: var(--green); color: #fff; }
+        .btn-green:hover { background: #059669; }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-edit { background: #eff6ff; color: var(--primary); }
+        .btn-edit:hover { background: #dbeafe; }
+        .btn-sm { padding: 7px 14px; font-size: 13px; }
+
+        /* ── Hotel List (Admin) ── */
+        .hotel-admin-card {
+            background: var(--card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 16px;
+            animation: fadeUp 0.3s ease both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .hotel-admin-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+        }
+
+        .hotel-admin-thumb {
+            width: 68px; height: 52px;
+            object-fit: cover;
+            border-radius: 10px;
+            flex-shrink: 0;
+            background: #e2e8f0;
+        }
+
+        .hotel-admin-info { flex: 1; min-width: 0; }
+        .hotel-admin-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .hotel-admin-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+        .hotel-admin-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        /* Edit Panel inside card */
+        .edit-panel {
+            display: none;
+            padding: 16px;
+            border-top: 1px solid var(--border);
+            background: #f8fafc;
+            animation: fadeUp 0.2s ease;
+        }
+        .edit-panel.open { display: block; }
+        .edit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        @media (max-width: 480px) { .edit-grid { grid-template-columns: 1fr; } }
+
+        /* Confirm modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: #fff;
+            border-radius: 20px;
+            padding: 28px 24px;
+            max-width: 340px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .modal-box h3 { font-family: 'Syne', sans-serif; font-size: 1.2rem; color: var(--text); margin-bottom: 8px; }
+        .modal-box p { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+        .modal-btns { display: flex; gap: 10px; }
+        .modal-btns .btn { flex: 1; }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 24px; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #1e293b;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 999;
+            transition: transform 0.3s ease;
+            pointer-events: none;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+        .empty-msg { text-align: center; color: var(--muted); padding: 40px 20px; }
     </style>
 </head>
 <body>
 
-<div class="form-container">
-    <h2>Add New Hotel</h2>
-    <input type="text" id="hName" placeholder="Hotel Name">
-    <input type="text" id="hImg" placeholder="Image URL">
-    <input type="number" id="hComm" placeholder="Taxi Commission (₹)">
-    <input type="number" id="hAcPrice" placeholder="A/C Starting Price">
-    <input type="number" id="hNacPrice" placeholder="Non-A/C Starting Price">
-    <input type="text" id="hMap" placeholder="Google Map Link">
-    <input type="password" id="hPass" placeholder="Set Manager Password">
-    <button id="addBtn">Add Hotel to Index</button>
+<h1>⚙️ Master Admin Panel</h1>
+
+<div class="admin-grid">
+    <!-- LEFT: Add Hotel Form -->
+    <div>
+        <div class="panel" id="add-panel">
+            <div class="panel-title">🏨 Add New Hotel</div>
+
+            <div class="field-group">
+                <label class="field-label">Hotel Name</label>
+                <input type="text" id="hName" placeholder="e.g. Grand Palace Hotel">
+            </div>
+            <div class="field-group">
+                <label class="field-label">Taxi Commission (₹)</label>
+                <input type="number" id="hComm" placeholder="e.g. 100">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div class="field-group">
+                    <label class="field-label">A/C Starting Price</label>
+                    <input type="number" id="hAcPrice" placeholder="₹1500">
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Non-A/C Starting Price</label>
+                    <input type="number" id="hNacPrice" placeholder="₹900">
+                </div>
+            </div>
+            <div class="field-group">
+                <label class="field-label">Google Map Link</label>
+                <input type="url" id="hMap" placeholder="https://maps.google.com/...">
+            </div>
+            <div class="field-group">
+                <label class="field-label">Manager Password</label>
+                <input type="password" id="hPass" placeholder="Set a secure code">
+            </div>
+
+            <!-- Photo Gallery -->
+            <div class="field-group">
+                <label class="field-label">📷 Photo Gallery</label>
+                <div class="photo-list" id="add-photo-list"></div>
+                <button class="add-photo-btn" onclick="addPhotoField('add-photo-list')">+ Add Photo URL</button>
+            </div>
+
+            <button class="btn btn-primary" onclick="addHotel()" style="margin-top:8px;">
+                🏨 Add Hotel to Index
+            </button>
+        </div>
+    </div>
+
+    <!-- RIGHT: Hotels List -->
+    <div>
+        <div class="panel">
+            <div class="panel-title">📋 Manage Hotels <span id="hotel-count" style="font-size:13px;color:var(--muted);margin-left:auto;"></span></div>
+            <div id="admin-hotel-list"><p class="empty-msg">⏳ Loading...</p></div>
+        </div>
+    </div>
 </div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="delete-modal">
+    <div class="modal-box">
+        <h3>🗑️ Delete Hotel?</h3>
+        <p>This action cannot be undone. The hotel and all its data will be permanently removed.</p>
+        <div class="modal-btns">
+            <button class="btn" style="background:#f1f5f9;color:var(--text);" onclick="closeDeleteModal()">Cancel</button>
+            <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+    import { getDatabase, ref, set, get, update, remove, onValue } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCvjtl_xusE7v6nXWSqabujY-88Apu-WR8",
@@ -38,23 +376,214 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    document.getElementById('addBtn').onclick = () => {
-        const id = document.getElementById('hName').value.replace(/\s+/g, '-').toLowerCase();
-        set(ref(db, 'hotels/' + id), {
-            name: document.getElementById('hName').value,
-            img: document.getElementById('hImg').value,
-            commission: document.getElementById('hComm').value,
-            acPrice: document.getElementById('hAcPrice').value,
-            nacPrice: document.getElementById('hNacPrice').value,
-            mapUrl: document.getElementById('hMap').value,
-            password: document.getElementById('hPass').value,
-            acRooms: 20,
-            nacRooms: 20
-        }).then(() => {
-            alert("Hotel Added Successfully!");
-            location.reload();
-        });
+    let deleteTargetId = null;
+
+    // ── Toast ──
+    function toast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    // ── Photo Field ──
+    window.addPhotoField = (listId, value = '') => {
+        const list = document.getElementById(listId);
+        const item = document.createElement('div');
+        item.className = 'photo-item';
+        const img = document.createElement('img');
+        img.src = value || 'https://via.placeholder.com/80x60?text=IMG';
+        const input = document.createElement('input');
+        input.type = 'url';
+        input.placeholder = 'https://...photo.jpg';
+        input.value = value;
+        input.oninput = () => { img.src = input.value || 'https://via.placeholder.com/80x60?text=IMG'; };
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'photo-remove';
+        removeBtn.innerHTML = '×';
+        removeBtn.onclick = () => item.remove();
+        item.appendChild(img);
+        item.appendChild(input);
+        item.appendChild(removeBtn);
+        list.appendChild(item);
     };
+
+    function getPhotosFromList(listId) {
+        const inputs = document.querySelectorAll(`#${listId} input[type=url]`);
+        const photos = {};
+        let i = 0;
+        inputs.forEach(inp => { if (inp.value.trim()) photos[`p${i++}`] = inp.value.trim(); });
+        return photos;
+    }
+
+    // ── Add Hotel ──
+    window.addHotel = async () => {
+        const name = document.getElementById('hName').value.trim();
+        const comm = document.getElementById('hComm').value.trim();
+        const acP  = document.getElementById('hAcPrice').value.trim();
+        const nacP = document.getElementById('hNacPrice').value.trim();
+        const map  = document.getElementById('hMap').value.trim();
+        const pass = document.getElementById('hPass').value.trim();
+
+        if (!name || !comm || !acP || !nacP || !pass) {
+            toast('⚠️ Please fill all required fields.');
+            return;
+        }
+
+        const id = name.replace(/\s+/g, '-').toLowerCase();
+        const photos = getPhotosFromList('add-photo-list');
+        // Keep backwards-compat: set img to first photo
+        const firstPhoto = Object.values(photos)[0] || '';
+
+        await set(ref(db, 'hotels/' + id), {
+            name, commission: comm,
+            acPrice: acP, nacPrice: nacP,
+            mapUrl: map, password: pass,
+            acRooms: 20, nacRooms: 20,
+            img: firstPhoto,
+            photos,
+        });
+
+        toast('✅ Hotel added successfully!');
+        document.getElementById('hName').value = '';
+        document.getElementById('hComm').value = '';
+        document.getElementById('hAcPrice').value = '';
+        document.getElementById('hNacPrice').value = '';
+        document.getElementById('hMap').value = '';
+        document.getElementById('hPass').value = '';
+        document.getElementById('add-photo-list').innerHTML = '';
+    };
+
+    // ── Delete ──
+    window.openDeleteModal = (id) => {
+        deleteTargetId = id;
+        document.getElementById('delete-modal').classList.add('open');
+    };
+    window.closeDeleteModal = () => {
+        deleteTargetId = null;
+        document.getElementById('delete-modal').classList.remove('open');
+    };
+    window.confirmDelete = async () => {
+        if (!deleteTargetId) return;
+        await remove(ref(db, 'hotels/' + deleteTargetId));
+        closeDeleteModal();
+        toast('🗑️ Hotel deleted.');
+    };
+
+    // ── Toggle Edit Panel ──
+    window.toggleEdit = (id) => {
+        const panel = document.getElementById(`edit-panel-${id}`);
+        panel.classList.toggle('open');
+    };
+
+    // ── Save Edit ──
+    window.saveEdit = async (id) => {
+        const get = (field) => document.getElementById(`edit-${field}-${id}`)?.value?.trim();
+        const photos = getPhotosFromList(`edit-photo-list-${id}`);
+        const firstPhoto = Object.values(photos)[0] || '';
+
+        const updates = {
+            name: get('name'),
+            commission: get('comm'),
+            acPrice: get('acPrice'),
+            nacPrice: get('nacPrice'),
+            mapUrl: get('map'),
+            img: firstPhoto,
+            photos,
+        };
+
+        const newPass = get('pass');
+        if (newPass) updates.password = newPass;
+
+        await update(ref(db, 'hotels/' + id), updates);
+        toast('✅ Hotel updated!');
+        document.getElementById(`edit-panel-${id}`).classList.remove('open');
+    };
+
+    // ── Render Hotel List ──
+    onValue(ref(db, 'hotels'), (snapshot) => {
+        const listEl = document.getElementById('admin-hotel-list');
+        listEl.innerHTML = '';
+        const data = snapshot.val();
+
+        if (!data) {
+            listEl.innerHTML = '<p class="empty-msg">No hotels yet. Add one! 👈</p>';
+            document.getElementById('hotel-count').textContent = '';
+            return;
+        }
+
+        const keys = Object.keys(data);
+        document.getElementById('hotel-count').textContent = `${keys.length} hotel${keys.length > 1 ? 's' : ''}`;
+
+        keys.forEach((id, idx) => {
+            const hotel = data[id];
+            const photos = hotel.photos ? Object.values(hotel.photos) : (hotel.img ? [hotel.img] : []);
+            const thumb = photos[0] || 'https://via.placeholder.com/80x60?text=No+IMG';
+
+            const card = document.createElement('div');
+            card.className = 'hotel-admin-card';
+            card.style.animationDelay = `${idx * 60}ms`;
+
+            card.innerHTML = `
+                <div class="hotel-admin-header">
+                    <img class="hotel-admin-thumb" src="${thumb}" alt="">
+                    <div class="hotel-admin-info">
+                        <div class="hotel-admin-name">${hotel.name}</div>
+                        <div class="hotel-admin-meta">💰 ₹${hotel.commission} commission &nbsp;•&nbsp; 📷 ${photos.length} photo${photos.length !== 1 ? 's' : ''}</div>
+                    </div>
+                    <div class="hotel-admin-actions">
+                        <button class="btn btn-edit btn-sm" onclick="toggleEdit('${id}')">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('${id}')">🗑️</button>
+                    </div>
+                </div>
+
+                <div class="edit-panel" id="edit-panel-${id}">
+                    <div class="edit-grid">
+                        <div class="field-group">
+                            <label class="field-label">Hotel Name</label>
+                            <input type="text" id="edit-name-${id}" value="${hotel.name}">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Commission (₹)</label>
+                            <input type="number" id="edit-comm-${id}" value="${hotel.commission}">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">A/C Starting Price</label>
+                            <input type="number" id="edit-acPrice-${id}" value="${hotel.acPrice}">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Non-A/C Starting Price</label>
+                            <input type="number" id="edit-nacPrice-${id}" value="${hotel.nacPrice}">
+                        </div>
+                        <div class="field-group" style="grid-column:1/-1;">
+                            <label class="field-label">Google Map Link</label>
+                            <input type="url" id="edit-map-${id}" value="${hotel.mapUrl || ''}">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">New Password (optional)</label>
+                            <input type="password" id="edit-pass-${id}" placeholder="Leave blank to keep current">
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label">📷 Photo Gallery</label>
+                        <div class="photo-list" id="edit-photo-list-${id}"></div>
+                        <button class="add-photo-btn" onclick="addPhotoField('edit-photo-list-${id}')">+ Add Photo URL</button>
+                    </div>
+
+                    <div style="display:flex;gap:10px;margin-top:14px;">
+                        <button class="btn btn-green" onclick="saveEdit('${id}')">💾 Save Changes</button>
+                        <button class="btn" style="background:#f1f5f9;color:var(--text);" onclick="toggleEdit('${id}')">Cancel</button>
+                    </div>
+                </div>
+            `;
+
+            listEl.appendChild(card);
+
+            // Populate existing photos into edit form
+            photos.forEach(url => addPhotoField(`edit-photo-list-${id}`, url));
+        });
+    });
 </script>
 </body>
 </html>
